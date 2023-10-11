@@ -1,5 +1,6 @@
 # $pip install geopy
 from geopy.geocoders import Nominatim
+from meteostat import Stations, Daily
 
 def haversine(lat1, lon1, lat2, lon2):
     """
@@ -123,3 +124,35 @@ def get_waste_factor(lat, lon):
     else : 
         waste_score = float(waste_score['waste_management_score'])
     return waste_score
+
+
+def get_wind_infos(lat, lon, date):
+    '''
+    INPUT : 
+        - lat : latitue
+        - lon : longitude
+        - date (int format : yyyymmdd)
+        
+    OUTPUT : 
+        tuple (wind speed, wind direction) 
+        for the specified loction at the specified date
+        (the infos correspond to the closest meteorogical station
+        with available data for the specified date)
+    '''
+
+    date = str(date)
+    year, month, day = int(date[:4]), int(date[4:6]), int(date[6:])
+    date = dt.datetime(year, month, day)
+
+    stations = Stations()
+    stations = stations.nearby(lat, lon)
+    stations = stations.fetch()
+    stations = stations[stations['daily_end']>=date]
+    station = stations.index[0]
+
+    data = Daily(station, start, start)
+    data = data.fetch()
+    w_speed = data['wspd'].values[0]
+    w_dir = data['wdir'].values[0]
+    
+    return w_speed, w_dir
