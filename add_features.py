@@ -24,7 +24,6 @@ def haversine(lat1, lon1, lat2, lon2):
     distance = radius * c
     return distance
 
-
 def find_closest_lines(dataset, lat, lon, num_closest=3):
     '''
     INPUTS : 
@@ -49,7 +48,6 @@ def find_closest_lines(dataset, lat, lon, num_closest=3):
     
     return closest_indexes
 
-
 def find_closest_line(dataset, lat, lon):
     '''
     INPUTS : 
@@ -59,64 +57,54 @@ def find_closest_line(dataset, lat, lon):
 
     OUTPUT : the index of the closest point in the dataset
     '''
-    distances = []
-    for idx, row in dataset.iterrows():
-        point_lat = row['latitude']
-        point_lon = row['longitude']
-        dist = haversine(lat, lon, point_lat, point_lon)
-        distances.append((idx, dist))
-    
-    # Sort by distance and get the indexes of the closest houses
-    distances.sort(key=lambda x: x[1])
-    closest_indexes = [idx for idx, _ in distances[:1]][0]
-
+    closest_index = find_closest_lines(dataset, lat, lon, num_closest=1)[0]
+    return(closest_index)
 
 def get_country_from_coordinates(latitude, longitude):
     """
     Get the country name from latitude and longitude coordinates.
     """
     geolocator = Nominatim(user_agent="geoapiExercises")
-    location = geolocator.reverse(f"{latitude}, {longitude}", exactly_one=True)
+    location = geolocator.reverse(f"{latitude}, {longitude}", exactly_one=True, language="en")
     
     if location and 'address' in location.raw:
         country = location.raw['address'].get('country')
         if country:
             return country
-    return "Country not found"
+    return "NA"
 
 
+df_refineries = pd.read_excel('additional_data/geographical_context.xls', sheet_name='refineries')
+df_coal = pd.read_excel('additional_data/geographical_context.xls', sheet_name='coal_mines')
+df_waste = pd.read_excel('additional_data/geographical_context.xls', sheet_name='waste_management')
+df_methane = pd.read_csv('additional_data/aggregated_methane.csv')
+df_methane.set_index('country', inplace=True)
 
 
-
-def get_coal_factor(lat, lon):
+def get_coal_factor(lat, lon, df_coal):
     '''
     distance in km to the nearest coal mine
     '''
-    df_coal = pd.read_excel('additional_data/geographical_context.xls', sheet_name='coal_mines')
     closest_index = find_closest_line(df_coal, lat, lon)
-    lat_coal = df_coal.loc[i]['latitude']
-    lon_coal = df_coal.loc[i]['longitude']
+    lat_coal = df_coal.loc[closest_index]['latitude']
+    lon_coal = df_coal.loc[closest_index]['longitude']
     distance = haversine(lat, lon, lat_coal, lon_coal)
     return distance
 
-
-def get_refinerie_factor(lat, lon):
+def get_refinerie_factor(lat, lon, df_refineries):
     '''
     distance in km to the nearest refinery
     '''
-    df_refineries = pd.read_excel('additional_data/geographical_context.xls', sheet_name='refineries')
     closest_index = find_closest_line(df_refineries, lat, lon)
-    lat_raf = df_refineries.loc[i]['latitude']
-    lon_raf = df_refineries.loc[i]['longitude']
+    lat_raf = df_refineries.loc[closest_index]['latitude']
+    lon_raf = df_refineries.loc[closest_index]['longitude']
     distance = haversine(lat, lon, lat_raf, lon_raf)
     return distance
 
-
-def get_waste_factor(lat, lon):
+def get_waste_factor(lat, lon, df_waste):
     '''
     waste factor of the country
     '''
-    df_waste = pd.read_excel('additional_data/geographical_context.xls', sheet_name='waste_management')
     country = get_country_from_coordinates(lat, lon)
     waste_score = df_waste[df_waste['country']==country]
     if len(waste_score)==0:
@@ -125,6 +113,10 @@ def get_waste_factor(lat, lon):
         waste_score = float(waste_score['waste_management_score'])
     return waste_score
 
+def get_methane_factor(lat, lon, df_methane):
+    country = get_country_from_coordinates(lat, lon)
+    methane_emissions = df_methane.loc[country]['emissions']
+    return methane_emissions
 
 def get_wind_infos(lat, lon, date):
     '''
