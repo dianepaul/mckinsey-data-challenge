@@ -5,7 +5,6 @@ from meteostat import Stations, Daily
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 import os
-import os
 from PIL import Image
 import imageio
 import cv2
@@ -402,6 +401,19 @@ test_metadata = test_metadata.assign(
 # Drop duplicates in test and train
 train_metadata = train_metadata.drop_duplicates()
 test_metadata = test_metadata.drop_duplicates()
+
+#Add probability of cnn model as feature
+test_results = pd.read_csv('test_results.csv')
+test_metadata = test_metadata.merge(test_results, on='path', how='left')
+
+# 2. Read the train_results CSV file, filter, and extract the path
+train_results = pd.read_csv('train_results.csv')
+train_results = train_results[train_results['path'].str.contains('augmented_0_')]
+train_results['extracted_path'] = train_results['path'].str[-11:]
+
+# 3. Join the extracted path with train_metadata
+train_metadata['extracted_path'] = train_metadata['path'].str[-11:]
+train_metadata = train_metadata.merge(train_results[['extracted_path', 'new_feature']], on='extracted_path', how='left')
 
 # One-hot encoding for categorical feature 'plume'
 train_metadata = pd.get_dummies(train_metadata, columns=['plume'])
