@@ -39,12 +39,13 @@
 
 import random
 
+
 class FakePretrainedModel:
     def __init__(self, image_array):
         self.image_array = image_array
         pass
 
-    def forward(self):
+    def predict(self):
         # Check if the input image is 64x64 pixels
         if self.image_array.size == (64, 64):
             # Generate a random number between 0 and 1
