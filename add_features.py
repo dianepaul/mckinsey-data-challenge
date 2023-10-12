@@ -155,3 +155,4 @@ def get_wind_infos(lat, lon, date):
     w_dir = data['wdir'].values[0]
     
     return w_speed, w_dir
+
