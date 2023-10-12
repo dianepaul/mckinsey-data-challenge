@@ -1,6 +1,10 @@
 # $pip install geopy
+# $pip install meteostat
+
 from geopy.geocoders import Nominatim
 from meteostat import Stations, Daily
+import pandas as pd
+import datetime as dt
 
 def haversine(lat1, lon1, lat2, lon2):
     """
@@ -107,28 +111,31 @@ def get_waste_factor(lat, lon, df_waste):
     '''
     country = get_country_from_coordinates(lat, lon)
     waste_score = df_waste[df_waste['country']==country]
-    if len(waste_score)==0:
-        waste_score = 0
-    else : 
-        waste_score = float(waste_score['waste_management_score'])
-    return waste_score
+    return (
+        waste_score['waste_management_score'].mean()
+        if len(waste_score) == 0
+        else float(waste_score['waste_management_score'])
+    )
 
 def get_methane_factor(lat, lon, df_methane):
     country = get_country_from_coordinates(lat, lon)
-    methane_emissions = df_methane.loc[country]['emissions']
-    return methane_emissions
+    return (
+        df_methane['emissions'].mean()
+        if country not in df_methane.index.tolist()
+        else df_methane.loc[country]['emissions']
+    )
 
 def get_wind_infos(lat, lon, date):
     '''
     INPUT : 
-        - lat : latitue
+        - lat : latitude
         - lon : longitude
         - date (int format : yyyymmdd)
         
     OUTPUT : 
         tuple (wind speed, wind direction) 
-        for the specified loction at the specified date
-        (the infos correspond to the closest meteorogical station
+        for the specified location at the specified date
+        (the infos correspond to the closest meterological station
         with available data for the specified date)
     '''
 
