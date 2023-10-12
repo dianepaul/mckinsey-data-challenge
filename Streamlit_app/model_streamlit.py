@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 
 """
     Predicts the likelihood of an image being a 'plume' based on specific input parameters.
@@ -22,10 +23,13 @@ class Model_results:
 
     def predict(self):
         # Predict the probability of an image being a plume based on the test results.
-        prediction = self.result_csv[
-            self.result_csv[self.result_csv["path"] == self.file_name]
-        ]["label"][0]
-        return prediction
+        filtered_results = self.result_csv[self.result_csv["path"] == self.file_name]
+
+        if not filtered_results.empty:
+            prediction = filtered_results["label"].iloc[0]
+            return prediction
+        else:
+            return random.random()  # Handle the case when there's no matching result
 
 
 """

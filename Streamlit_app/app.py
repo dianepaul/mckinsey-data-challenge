@@ -16,9 +16,12 @@ st.set_page_config(
 )
 warnings.filterwarnings("ignore")
 
-# Load custom CSS
-with open("custom.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Read the custom.css file
+with open("custom.css", "r") as f:
+    custom_css = f.read()
+
+# Apply the custom CSS styles
+st.markdown(f"<style>{custom_css}</style>", unsafe_allow_html=True)
 
 st.markdown(
     "<h1 style='text-align: center'>Plume detection</h1>", unsafe_allow_html=True

@@ -12,12 +12,6 @@ class Streamlit_Page0:
         self.latitude = None
         self.longitude = None
 
-    def predict_with_model(self, image):
-        # Make a prediction using your CNN model
-        model = Model_results(image)
-        prediction = model.predict()
-        return prediction
-
     def update_metadata(self):
         # Add an optional filter for IDs based on the selected date
         if self.selected_date:
@@ -42,8 +36,9 @@ class Streamlit_Page0:
             + self.selected_id
             + ".tiff"
         )
-        prediction = self.predict_with_model(file_name)
-        st.header(f"Prediction: {prediction:.4f}")
+        prediction = Model_results(file_name).predict()
+        if prediction is not None:
+            st.header(f"Prediction: {prediction:.4f}")
 
         if self.selected_id:
             # Get the corresponding latitude and longitude
@@ -59,7 +54,7 @@ class Streamlit_Page0:
             ].values[0]
 
             st.write(
-                f"Geographical Coordinates Lat: {self.latitude}, Lon: {self.longitude}"
+                f"Geographical Coordinates Lat: {self.latitude:.4f}, Lon: {self.longitude:.4f}"
             )
 
             if st.button("Show Map"):
