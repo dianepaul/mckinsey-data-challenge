@@ -3,11 +3,22 @@ import folium
 from PIL import Image
 import numpy as np
 import tensorflow as tf
+import torch
 
-# Load your pre-trained CNN model for methane detection here
-# Replace 'your_model.h5' with the path to your trained model.
-model = tf.keras.models.load_model('paper_cnn.ipynb')
+st.set_option('browser.gatherUsageStats', True)
 
+# Load your model
+model_path = "fake_model_streamlit.py"
+model = FakePretrainedModel()
+model.load_state_dict(torch.load(model_path))
+model.eval()  # Set the model in evaluation mode
+
+@st.cache(suppress_st_warning=True)
+
+def predict_with_model(image_array):
+    # Make a prediction using your CNN model
+    prediction = model.predict(image_array)
+    return prediction
 
 def main():
     st.title("Latitude and Longitude to Map")
@@ -51,7 +62,7 @@ def main():
         image_array = np.expand_dims(image_array, axis=0)  # Add batch dimension
 
         # Make a prediction using your CNN model
-        prediction = model.predict(image_array)
+        prediction = predict_with_model(image_array)
 
         # Display the prediction result (you can customize this part)
         st.write(f"Prediction: {prediction[0][0]:.4f}")
