@@ -1,1 +1,0 @@
-# mckinsey-data-challenge
