@@ -1,8 +1,4 @@
 import streamlit as st
-from PIL import Image
-from fake_model_streamlit import FakePretrainedModel
-import random
-import pandas as pd
 import warnings
 from app_p0 import Streamlit_Page0
 from app_p1 import Streamlit_Page1

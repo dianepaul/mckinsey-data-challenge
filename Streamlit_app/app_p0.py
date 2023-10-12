@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from PIL import Image
+from model_streamlit import Model_results
 
 
 class Streamlit_Page0:
@@ -10,6 +11,12 @@ class Streamlit_Page0:
         self.selected_date = None
         self.latitude = None
         self.longitude = None
+
+    def predict_with_model(self, image):
+        # Make a prediction using your CNN model
+        model = Model_results(image)
+        prediction = model.predict()
+        return prediction
 
     def update_metadata(self):
         # Add an optional filter for IDs based on the selected date
@@ -29,6 +36,14 @@ class Streamlit_Page0:
 
         # Callback function for updating selected ID
         self.update_metadata()
+        file_name = (
+            str(self.selected_date)
+            + "_methane_mixing_ratio_"
+            + self.selected_id
+            + ".tiff"
+        )
+        prediction = self.predict_with_model(file_name)
+        st.header(f"Prediction: {prediction:.4f}")
 
         if self.selected_id:
             # Get the corresponding latitude and longitude
