@@ -37,13 +37,13 @@ def augment_and_save_images(original_directory, output_directory):
                 augmented_image.save(os.path.join(output_directory, f"augmented_{i}_{filename}"))
 
 # Call the function to augment and save images for the "plume" class
-original_directory_plume = "../hfactory_magic_folders/cleanr/train data/images/plume"
-output_directory_plume = "data_augmented/plume"
+original_directory_plume = "../cleanr/train data/images/plume"
+output_directory_plume = "../data_augmented/plume"
 augment_and_save_images(original_directory_plume, output_directory_plume)
 
 # Call the function to augment and save images for the "no_plume" class
-original_directory_no_plume = "../hfactory_magic_folders/cleanr/train data/images/no_plume"
-output_directory_no_plume = "data_augmented/no_plume"
+original_directory_no_plume = "../cleanr/train data/images/no_plume"
+output_directory_no_plume = "../data_augmented/no_plume"
 augment_and_save_images(original_directory_no_plume, output_directory_no_plume)
 
 
@@ -54,7 +54,7 @@ transform = transforms.Compose([
 ])
 
 # Path to your dataset folder
-data_dir = 'data_augmented/'
+data_dir = '../data_augmented/'
 
 # Create the ImageFolder dataset
 def create_dataset(data_dir):
@@ -113,6 +113,10 @@ def train_model(data_dir, num_epochs=15, batch_size=32, learning_rate=0.001):
     criterion = nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+    # Lists to store training data predictions
+    training_image_paths = []
+    training_probabilities = []
+
     for epoch in range(num_epochs):
         model.train()
         for images, labels in train_loader:
@@ -124,6 +128,14 @@ def train_model(data_dir, num_epochs=15, batch_size=32, learning_rate=0.001):
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
+
+            # Collect training data predictions
+            training_image_paths += [dataset.imgs[i][0] for i in range(len(images))]
+            training_probabilities += outputs.cpu().tolist()
+
+    # Save training data results to a CSV file
+    training_df = pd.DataFrame({"path": training_image_paths, "proba": training_probabilities})
+    training_df.to_csv("train_results.csv", index=False)
 
     return model
 
@@ -150,14 +162,13 @@ def predict_new_image(model, image):
 trained_model = train_model(data_dir)
 
 # Test the model
-test_data_dir = "cleanr/test data/images"
+test_data_dir = "../cleanr/test data/images"
 
 test_transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
     transforms.ToTensor()
     # Add any other necessary transformations and normalization steps here
 ])
-
 
 def evaluate_test_images(trained_model, test_data_dir):
     """
@@ -192,7 +203,7 @@ def evaluate_test_images(trained_model, test_data_dir):
 
 image_paths, probability = evaluate_test_images(trained_model, test_data_dir)
 
-df = pd.DataFrame({"path": image_paths, "label": probability})
+df = pd.DataFrame({"path": image_paths, "proba": probability})
 
 df.to_csv("test_results.csv", index=False)
 
