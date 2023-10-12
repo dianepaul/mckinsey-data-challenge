@@ -5,8 +5,6 @@ import numpy as np
 import tensorflow as tf
 import torch
 
-st.set_option('browser.gatherUsageStats', True)
-
 # Load your model
 model_path = "fake_model_streamlit.py"
 model = FakePretrainedModel()
