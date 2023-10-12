@@ -9,6 +9,14 @@ from sklearn.metrics import roc_auc_score
 
 # Function to augment and save images
 def augment_and_save_images(original_directory, output_directory):
+    """
+    Augments images from the original_directory and saves the augmented images to the output_directory.
+
+    Args:
+        original_directory (str): Path to the directory containing the original images.
+        output_directory (str): Path to the directory where augmented images will be saved.
+
+    """
     os.makedirs(output_directory, exist_ok=True)  # Create the output directory if it doesn't exist
 
     # List of transformation functions
@@ -50,6 +58,15 @@ data_dir = 'data_augmented/'
 
 # Create the ImageFolder dataset
 def create_dataset(data_dir):
+    """
+    Creates an ImageFolder dataset from the specified directory.
+
+    Args:
+        data_dir (str): Path to the directory containing the dataset.
+
+    Returns:
+        dataset: An ImageFolder dataset object.
+    """
     dataset = datasets.ImageFolder(root=data_dir, transform=transform)
     return dataset
 
@@ -76,6 +93,18 @@ class PlumeCNN(nn.Module):
 
 # Define a function to train the model
 def train_model(data_dir, num_epochs=15, batch_size=32, learning_rate=0.001):
+    """
+    Trains a convolutional neural network model on the specified dataset.
+
+    Args:
+        data_dir (str): Path to the directory containing the dataset.
+        num_epochs (int): Number of training epochs.
+        batch_size (int): Batch size for training.
+        learning_rate (float): Learning rate for optimization.
+
+    Returns:
+        model: The trained CNN model.
+    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = create_dataset(data_dir)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -100,6 +129,16 @@ def train_model(data_dir, num_epochs=15, batch_size=32, learning_rate=0.001):
 
 # Define a function to predict the ROC AUC of a new test image
 def predict_new_image(model, image):
+    """
+    Predicts the probability of an image belonging to a class using a trained model.
+
+    Args:
+        model: Trained CNN model.
+        image: Input image tensor.
+
+    Returns:
+        output (float): Probability of the image belonging to a class (0-1).
+    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     image = image.to(device)
     model.eval()
@@ -121,6 +160,17 @@ test_transform = transforms.Compose([
 
 
 def evaluate_test_images(trained_model, test_data_dir):
+    """
+    Evaluates the test images using a trained model and returns the image paths and probabilities of being a plume.
+
+    Args:
+        trained_model: Trained CNN model.
+        test_data_dir (str): Path to the directory containing test images.
+
+    Returns:
+        image_paths (list): List of image file paths.
+        probability (list): List of predicted probabilities.
+    """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     trained_model.to(device)
     trained_model.eval()
