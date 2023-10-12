@@ -6,7 +6,7 @@ import tensorflow as tf
 
 # Load your pre-trained CNN model for methane detection here
 # Replace 'your_model.h5' with the path to your trained model.
-model = tf.keras.models.load_model('your_model.h5')
+model = tf.keras.models.load_model('paper_cnn.ipynb')
 
 
 def main():
