@@ -15,8 +15,6 @@ class Streamlit_Page1:
         return prediction  # random.random()
 
     def page_plume_detection(self):
-        st.subheader("Plume Detection")
-
         col1, col2 = st.columns([3, 5])
 
         # File uploader for TIFF image
